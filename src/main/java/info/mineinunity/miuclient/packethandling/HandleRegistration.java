@@ -33,16 +33,31 @@ import java.util.List;
 
 public class HandleRegistration {
     private static final List<Handler> HANDLER_LIST = new ArrayList<>();
-    private static ConnectorSocket socket;
+    private ConnectorSocket socket;
 
     private static final String DEFAULT_WORLD_NAME = "world";
 
-    static {
+
+    public HandleRegistration(ConnectorSocket socket) {
+        registerHandlers();
+        for(Handler handler : HANDLER_LIST) {
+            socket.listener().addHandler(handler);
+        }
+        this.socket = socket;
+    }
+
+    private HandleRegistration(ConnectorSocket socket, List<Handler> list) {
+        this(socket);
+        HANDLER_LIST.addAll(list);
+    }
+
+    private void registerHandlers() {
         addHandler(new Handler() {
             @Override
             public void onPacketRecieve(Object packet) {
                 if(packet instanceof PacketDisconnect) {
                     NativeCaller.disconnect();
+                    socket.disconnect();
                 }
             }
         }).addHandler(new Handler() {
@@ -72,19 +87,7 @@ public class HandleRegistration {
         });
     }
 
-    public HandleRegistration(ConnectorSocket socket) {
-        for(Handler handler : HANDLER_LIST) {
-            socket.listener().addHandler(handler);
-        }
-        this.socket = socket;
-    }
-
-    private HandleRegistration(ConnectorSocket socket, List<Handler> list) {
-        this(socket);
-        HANDLER_LIST.addAll(list);
-    }
-
-    private static HandleRegistration addHandler(Handler handle) {
+    private HandleRegistration addHandler(Handler handle) {
         HANDLER_LIST.add(handle);
         return new HandleRegistration(socket, HANDLER_LIST);
     }
