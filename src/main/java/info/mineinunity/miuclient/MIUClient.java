@@ -38,7 +38,8 @@ public class MIUClient {
         } catch (ConnectException x) {
             NativeCaller.handleError(x.getLocalizedMessage());
         }
-        socket.sendPacket(new Client(MIUClient.PLAYER_NAME));
+        PLAYER_NAME = args[0]; // TODO temp solution
+        socket.sendPacket(new Client(PLAYER_NAME));
 
         HandleRegistration registration = new HandleRegistration(socket);
     }
