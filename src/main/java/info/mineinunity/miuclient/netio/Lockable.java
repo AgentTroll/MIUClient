@@ -25,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 class Lockable {
     private final Lock lock = new ReentrantLock();
-    private boolean locked;
+    private volatile boolean locked;
 
     Lock getLock() {
         return this.lock;
