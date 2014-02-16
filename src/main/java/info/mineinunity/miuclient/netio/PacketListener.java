@@ -20,10 +20,11 @@
  */
 package info.mineinunity.miuclient.netio;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import info.mineinunity.miuclient.MIUClient;
+import info.mineinunity.miuserver.api.ServerHandler;
+import info.mineinunity.miuserver.protocol.toclient.PacketDisconnect;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +33,7 @@ public class PacketListener {
     public static final short BUFFER_LENGTH = 8192;
     protected volatile boolean running = false;
 
-    private ThreadLocal<byte[]> BUFFER_ARRAY = new ThreadLocal<>();
+    private volatile byte[] BUFFER_ARRAY;
     private final List<Handler> handles = Collections.synchronizedList(new ArrayList<Handler>());
 
     private class Listener implements Runnable {
@@ -70,35 +71,40 @@ public class PacketListener {
 
             try {
                 int bytesRead;
-                while ((bytesRead = this.socket.stream().wrappedReader().read(BUFFER_ARRAY.get())) > 0) {
-                    this.output.write(BUFFER_ARRAY.get(), 0, bytesRead);
+                while ((bytesRead = this.socket.stream().wrappedReader().read(BUFFER_ARRAY)) > 0) {
+                    this.output.write(BUFFER_ARRAY, 0, bytesRead);
                 }
 
                 this.in = new ByteArrayInputStream(output.toByteArray());
-                this.is = new ObjectInputStream(in);
+                try {
+                    this.is = new ObjectInputStream(in);
+                } catch (EOFException x) {
+                    handlePacket(new PacketDisconnect(ServerHandler.playerForName(MIUClient.PLAYER_NAME)));
+                }
                 handlePacket(this.is.readObject());
             } catch (IOException | ClassNotFoundException x) {
                 x.printStackTrace();
             } finally {
+                output.reset();
                 try {
-                    output.reset();
-                    in.close();
-                    is.close();
-                } catch (IOException x) {
-                    x.printStackTrace();
+                    if(is != null) {
+                        this.is.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 
-    private PacketListener(final ConnectorSocket socket, final int bufferLength) {
-        byte[] bytes = new byte[bufferLength];
-        BUFFER_ARRAY.set(bytes);
 
+    private PacketListener(final ConnectorSocket socket, final int bufferLength) {
+        BUFFER_ARRAY = new byte[bufferLength];
+
+        final Listener listener = new Listener(socket);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Listener listener = new Listener(socket);
                 while(true) {
                     if(running) {
                         listener.run();

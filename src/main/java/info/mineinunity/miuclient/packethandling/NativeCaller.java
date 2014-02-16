@@ -27,6 +27,8 @@ public class NativeCaller {
 
     native public static void disconnect();
 
+    native public static void handleError(String errorSlug);
+
     native public static void breakBlock(String worldName, double motX, double motY, double motZ);
 
     native public static void placeBlock(String worldName, double motX, double motY, double motZ);

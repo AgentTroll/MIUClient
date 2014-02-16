@@ -23,10 +23,27 @@ package info.mineinunity.miuclient;
 import info.mineinunity.miuclient.netio.ConnectionFactory;
 import info.mineinunity.miuclient.netio.ConnectorSocket;
 import info.mineinunity.miuclient.packethandling.HandleRegistration;
+import info.mineinunity.miuclient.packethandling.NativeCaller;
+import info.mineinunity.miuserver.protocol.auth.Client;
+
+import java.net.ConnectException;
 
 public class MIUClient {
+    public static String PLAYER_NAME;
+
     public static void main(String[] args) throws Throwable {
-        ConnectorSocket socket = ConnectionFactory.newConnection("127.0.0.1");
+        ConnectorSocket socket = null;
+        try {
+            socket = ConnectionFactory.newConnection("127.0.0.1");
+        } catch (ConnectException x) {
+            NativeCaller.handleError(x.getLocalizedMessage());
+        }
+        socket.sendPacket(new Client(MIUClient.PLAYER_NAME));
+
         HandleRegistration registration = new HandleRegistration(socket);
+    }
+
+    public void setPlayerName(String _name) {
+        PLAYER_NAME = _name;
     }
 }

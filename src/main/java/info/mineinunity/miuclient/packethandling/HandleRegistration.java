@@ -60,7 +60,8 @@ public class HandleRegistration {
                     socket.disconnect();
                 }
             }
-        }).addHandler(new Handler() {
+        });
+        addHandler(new Handler() {
             @Override
             public void onPacketRecieve(Object packet) {
                 if(packet instanceof PacketBlockBreak) {
@@ -68,7 +69,8 @@ public class HandleRegistration {
                     NativeCaller.breakBlock(DEFAULT_WORLD_NAME, loc.getX(),loc.getY(), loc.getZ());
                 }
             }
-        }).addHandler(new Handler() {
+        });
+        addHandler(new Handler() {
             @Override
             public void onPacketRecieve(Object packet) {
                 if (packet instanceof PacketBlockPlace) {
@@ -76,7 +78,8 @@ public class HandleRegistration {
                     NativeCaller.placeBlock(DEFAULT_WORLD_NAME, loc.getX(), loc.getY(), loc.getZ());
                 }
             }
-        }).addHandler(new Handler() {
+        });
+        addHandler(new Handler() {
             @Override
             public void onPacketRecieve(Object packet) {
                 if(packet instanceof PacketEntityMove) {
@@ -87,8 +90,7 @@ public class HandleRegistration {
         });
     }
 
-    private HandleRegistration addHandler(Handler handle) {
+    private void addHandler(Handler handle) {
         HANDLER_LIST.add(handle);
-        return new HandleRegistration(socket, HANDLER_LIST);
     }
 }

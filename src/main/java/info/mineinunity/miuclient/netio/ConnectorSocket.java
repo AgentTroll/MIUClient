@@ -24,11 +24,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.Queue;
 
-public class ConnectorSocket {
-    Queue<Object> queue = (Queue<Object>) Collections.synchronizedCollection(new ArrayDeque<>());
+public class ConnectorSocket extends Lockable {
+    Queue<Object> queue = new ArrayDeque<>();
 
     private Socket socket;
     private ConnectionStream connection;
@@ -50,12 +49,23 @@ public class ConnectorSocket {
         return this.connection;
     }
 
+    Queue<Object> access() {
+        Queue<Object> q;
+        super.lock();
+        q = this.queue;
+        super.unlock();
+        return q;
+    }
+
     public PacketListener listener() {
         return this.attribute;
     }
 
-    void setupConnection(ConnectionStream stream, PacketListener attribute) {
+    void internalStream(ConnectionStream stream) {
         this.connection = stream;
+    }
+
+    void setupConnection(PacketListener attribute) {
         this.attribute = attribute;
     }
 

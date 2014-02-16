@@ -44,7 +44,7 @@ public class Logger {
 
     public void logError(String message, Throwable throwable) {
         System.out.println("---------- ERROR ----------");
-        System.out.println(throwable.getMessage() + " - " + throwable.getCause() + ": " + message + "\n");
+        System.out.println(throwable.getLocalizedMessage() + " - " + throwable.getCause() + ": " + message + "\n");
         throwable.printStackTrace();
         System.out.println("---- END ERROR REPORT -----");
     }

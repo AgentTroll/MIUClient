@@ -20,18 +20,21 @@
  */
 package info.mineinunity.miuclient.netio;
 
+import java.net.ConnectException;
+
 public class ConnectionFactory {
     public static final short CONN_PORT = 9001;
 
     // Suppress instantiation
     private ConnectionFactory() { }
 
-    public static ConnectorSocket newConnection(String _ip) {
+    public static ConnectorSocket newConnection(String _ip) throws ConnectException {
         ConnectorSocket socket = new ConnectorSocket(_ip);
-        ConnectionStream stream = new ConnectionStream(socket);
+        socket.internalStream(new ConnectionStream(socket));
+
         PacketListener listener = new PacketListener(socket);
         listener.running = true;
-        socket.setupConnection(stream, listener);
+        socket.setupConnection(listener);
 
         return socket;
     }
