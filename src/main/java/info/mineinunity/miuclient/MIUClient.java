@@ -38,13 +38,13 @@ public class MIUClient {
         } catch (ConnectException x) {
             NativeCaller.handleError(x.getLocalizedMessage());
         }
-        PLAYER_NAME = args[0]; // TODO temp solution
+        PLAYER_NAME = setPlayerName(args[0]); // TODO temp solution
         socket.sendPacket(new Client(PLAYER_NAME));
 
         HandleRegistration registration = new HandleRegistration(socket);
     }
 
-    public void setPlayerName(String _name) {
+    protected static void setPlayerName(String _name) {
         PLAYER_NAME = _name;
     }
 }
