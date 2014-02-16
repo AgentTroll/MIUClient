@@ -21,7 +21,7 @@
 package info.mineinunity.miuclient.netio;
 
 public abstract class Handler extends Lockable {
-    void recievePacket(Object packet) {
+    final void recievePacket(Object packet) {
         lock();
         onPacketRecieve(packet);
         unlock();
